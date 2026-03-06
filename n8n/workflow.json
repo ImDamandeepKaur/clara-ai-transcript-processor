@@ -1,0 +1,274 @@
+{
+  "name": "Clara AI Transcript Processor",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Transcripts",
+        "formDescription": "Choose Transcript text file",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload demo call Transcript",
+              "fieldType": "file"
+            },
+            {
+              "fieldLabel": "upload onboarding call Transcript",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        192,
+        16
+      ],
+      "id": "f1200bda-49d2-47a2-ab44-afaa537c9027",
+      "name": "On form submission",
+      "webhookId": "76361c69-513c-46e7-a72e-7494b53a44b2"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "Upload_demo_call_Transcript",
+        "destinationKey": "demoTranscript",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        384,
+        0
+      ],
+      "id": "db61b15f-407d-4523-83f1-7cc424c94f16",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "upload_onboarding_call_Transcript",
+        "destinationKey": "onboardingTranscript",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        432,
+        160
+      ],
+      "id": "1b690c5b-b14a-4914-8696-d2a91f7ac7d8",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        592,
+        0
+      ],
+      "id": "328831bd-6a5a-4819-a551-b94e8c345edf",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the following call transcripts and extract structured business configuration.\n\nReturn JSON with the following structure:\n\n{\n \"company_name\": \"\",\n \"contact_name\": \"\",\n \"services_offered\": [],\n \"crm_system\": \"\",\n \"business_hours\": \"\",\n \"after_hours_policy\": \"\",\n \"call_transfer_rules\": \"\",\n \"pricing\": \"\",\n \"notification_preferences\": \"\"\n}\n\nDemo transcript:\n{{$json.demoTranscript}}\n\nOnboarding transcript:\n{{$json.onboardingTranscript}}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1008,
+        0
+      ],
+      "id": "feb6ee2d-cbe9-4517-9c4c-1d38cbc70e5f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAzureOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        160
+      ],
+      "id": "d089b997-8c0e-4276-8917-295d0950e9fb",
+      "name": "Azure OpenAI Chat Model",
+      "credentials": {
+        "azureOpenAiApi": {
+          "id": "pFkKu0kplsxkGdTO",
+          "name": "Azure Open AI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = JSON.parse($json.output.match(/```json([\\s\\S]*?)```/)[1]);\n\nreturn [{\n  memo: {\n    company_name: data.company_name,\n    contact_name: data.contact_name,\n    services: data.services_offered,\n    crm_system: data.crm_system,\n    business_hours: data.business_hours,\n    after_hours_policy: data.after_hours_policy,\n    pricing: data.pricing\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        -176
+      ],
+      "id": "40f7d1f0-27f9-484a-84c1-f8502cc5350e",
+      "name": "memo.json"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = JSON.parse($json.output.match(/```json([\\s\\S]*?)```/)[1]);\n\nreturn [{\n  agent_spec_v1: {\n    agent_name: \"Clara Receptionist\",\n    company: data.company_name,\n    role: \"AI receptionist for electrical service company\",\n    services_supported: data.services_offered,\n    call_transfer_rules: data.call_transfer_rules,\n    pricing: data.pricing,\n    notifications: data.notification_preferences\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        -16
+      ],
+      "id": "8f389a2c-504c-4ddf-8277-2bcbf0593f91",
+      "name": "agent_spec_v1.json"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = JSON.parse($json.output.match(/```json([\\s\\S]*?)```/)[1]);\n\nreturn [{\n  agent_spec_v2: {\n    agent_name: \"Clara Receptionist\",\n    company: data.company_name,\n    capabilities: [\n      \"call answering\",\n      \"job qualification\",\n      \"appointment scheduling\",\n      \"after-hours call filtering\"\n    ],\n    integrations: {\n      crm: data.crm_system\n    },\n    escalation_rules: data.call_transfer_rules,\n    pricing_rules: data.pricing\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        144
+      ],
+      "id": "89705a19-129d-4a2c-9e34-31fee7403164",
+      "name": "agent_spec_v2.json"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{\n  changelog: `\n# Agent Configuration Changelog\n\n## Version 1\nInitial AI receptionist configuration based on demo and onboarding call transcripts.\n\nFeatures:\n- Handles incoming customer calls\n- Captures service requests\n- Transfers calls to Ben when required\n- Integrates with Jobber CRM\n\n## Version 2\nImproved agent capabilities.\n\nEnhancements:\n- Better job qualification\n- After-hours call filtering\n- CRM integration improvements\n- Structured pricing rules\n`\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1360,
+        336
+      ],
+      "id": "0b7cd94c-f748-4bae-88c1-12356647d0c3",
+      "name": "changelog.md"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Azure OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "memo.json",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "agent_spec_v1.json",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "agent_spec_v2.json",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "changelog.md",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "memo.json": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4e73f8fa-8aca-4db6-a1bd-7608bd512329",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "703d506d3e9d531bf51a522eb27a6fe8ec840fdb54a91381905c534ceae53404"
+  },
+  "id": "cFKCPZaanal3dEgi",
+  "tags": []
+}
