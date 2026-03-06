@@ -1,0 +1,24 @@
+[
+  {
+    "memo": {
+      "company_name": "Ben's Electrical Solutions",
+      "contact_name": "Ben Penoyer",
+      "services": [
+        "Electrical service calls",
+        "Residential and commercial projects",
+        "Panel changes",
+        "Troubleshooting",
+        "Installation of EV chargers",
+        "Hot tub hookups"
+      ],
+      "crm_system": "Jobber",
+      "business_hours": "Monday to Friday, 8:00 AM to 4:30 PM",
+      "after_hours_policy": "Takes emergency calls for existing clients, mainly for one property management client; no standard emergency services otherwise.",
+      "pricing": {
+        "service_call_fee": "$115",
+        "hourly_rate": "$98 per hour",
+        "minimum_charge": "$150 for the first half hour"
+      }
+    }
+  }
+]
