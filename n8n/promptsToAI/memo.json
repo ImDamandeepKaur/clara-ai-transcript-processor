@@ -1,0 +1,13 @@
+const data = JSON.parse($json.output.match(/```json([\s\S]*?)```/)[1]);
+
+return [{
+  memo: {
+    company_name: data.company_name,
+    contact_name: data.contact_name,
+    services: data.services_offered,
+    crm_system: data.crm_system,
+    business_hours: data.business_hours,
+    after_hours_policy: data.after_hours_policy,
+    pricing: data.pricing
+  }
+}];
