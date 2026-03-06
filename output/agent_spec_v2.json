@@ -1,0 +1,23 @@
+[
+  {
+    "agent_spec_v2": {
+      "agent_name": "Clara Receptionist",
+      "company": "Ben's Electrical Solutions",
+      "capabilities": [
+        "call answering",
+        "job qualification",
+        "appointment scheduling",
+        "after-hours call filtering"
+      ],
+      "integrations": {
+        "crm": "Jobber"
+      },
+      "escalation_rules": "If a specific number calls, the call can be patched through directly to Ben; otherwise, unknown calls are answered by Clara.",
+      "pricing_rules": {
+        "service_call_fee": "$115",
+        "hourly_rate": "$98 per hour",
+        "minimum_charge": "$150 for the first half hour"
+      }
+    }
+  }
+]
